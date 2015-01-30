@@ -1,0 +1,29 @@
+///////////////////////////////////////////////////////////////////////////////
+//parser.uws
+fso = CREATEOLEOBJ("Scripting.FileSystemObject")
+f = fso.OpenTextFile("helpDecompile/uwsc.hhc")
+content = f.ReadAll();
+f.Close();
+doc = CREATEOLEOBJ("htmlfile")
+doc.Write(content)
+elements = doc.getElementsByTagName("param")
+elements_count = GETOLEITEM(elements)
+for i=0 to (elements_count - 1)
+    element = ALL_OLE_ITEM[i]
+    if element.getAttribute("value") = "スクリプト関数" then
+        func_place =i
+        //msgbox(i + "番目がスクリプト関数のエレメント")
+        //これ以降、paramエレメント3つで1セット。
+        //3つめのvalueを見ると、レベルが分かる。数学関数が来るまで取り込む
+        break
+    endif
+next
+for i=(func_place + 3) to (elements_count - 1) step 3
+    nameValue  = ALL_OLE_ITEM[i    ].getAttribute("value")
+    LocalValue = ALL_OLE_ITEM[i + 1].getAttribute("value")
+    ImageValue = ALL_OLE_ITEM[i + 2].getAttribute("value")
+    if nameValue = "数学関数" then
+        break
+    endif
+    print nameValue + " : " + LocalValue + " : " + ImageValue
+next

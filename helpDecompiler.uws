@@ -1,0 +1,9 @@
+//uwscディレクトリからカレントディレクトリにヘルプファイルをコピー
+textblock dosCopyCmd
+copy "GET_UWSC_DIR\uwsc.chm" "GET_CUR_DIR"
+hh.exe -decompile helpDecompile uwsc.chm
+del uwsc.chm
+endtextblock
+dosInput = replace(dosCopyCmd, "GET_UWSC_DIR", GET_UWSC_DIR)
+dosInput = replace(dosInput, "GET_CUR_DIR", GET_CUR_DIR)
+doscmd(dosInput)

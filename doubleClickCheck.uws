@@ -1,0 +1,48 @@
+//////////////////////////////////////////////////////////////////////////////
+//DoubleControl.uws
+TEXTBLOCK pp
+a. ウィンドウ関連
+{-
+a. GETID（ウィンドウIDの取得）
+b. CLKITEM（アイテムのクリック）
+-}
+ij
+kl
+mn
+ENDTEXTBLOCK
+public nowClickTime = 0
+public lastClickTime = 0
+public activeWinID
+public activeWinTitle
+ret = SETHOTKEY( , MOD_CONTROL, "KeyControl")
+public loopFlag = true
+while loopFlag
+    SLEEP(0.1)
+    temp_activeWinID = getid(GET_ACTIVE_WIN)
+    temp_activeWinTitle = status(temp_activeWinID, ST_TITLE)
+    if temp_activeWinTitle <> GET_UWSC_NAME then
+        activeWinID = temp_activeWinID
+        activeWinTitle = temp_activeWinTitle
+    endif
+wend
+SETHOTKEY(, MOD_CONTROL)
+procedure KeyControl
+    lastClickTime = nowClickTime
+    nowClickTime = gettime() + (G_TIME_ZZ / 1000)
+    //ダブルクリック判定（0.5秒以内）
+    if (nowClickTime - lastClickTime) <= 0.5 then
+        ActiveWindowControl()
+    endif
+fend
+procedure ActiveWindowControl
+    if Pos("Mery", activeWinTitle) then
+        popupControl()
+    endif
+fend
+procedure popupControl
+    ret = POPUPMENU(pp)
+    if ret = 7 then
+        loopFlag = false
+    endif
+    CTRLWIN(activeWinID, ACTIVATE)
+fend
