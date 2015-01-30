@@ -9,21 +9,80 @@ doc.Write(content)
 elements = doc.getElementsByTagName("param")
 elements_count = GETOLEITEM(elements)
 for i=0 to (elements_count - 1)
-    element = ALL_OLE_ITEM[i]
-    if element.getAttribute("value") = "スクリプト関数" then
-        func_place =i
-        //msgbox(i + "番目がスクリプト関数のエレメント")
-        //これ以降、paramエレメント3つで1セット。
-        //3つめのvalueを見ると、レベルが分かる。数学関数が来るまで取り込む
-        break
-    endif
+	element = ALL_OLE_ITEM[i]
+	if element.getAttribute("value") = "スクリプト関数" then
+		func_place =i
+		//msgbox(i + "番目がスクリプト関数のエレメント")
+		//これ以降、paramエレメント3つで1セット。
+		//3つめのvalueを見ると、レベルが分かる。数学関数が来るまで取り込む
+		break
+	endif
 next
+
+//ハッシュソートを利用し、メニューを作成する
+hashtbl menuTbl = HASH_SORT
+
+f1Index=0
+
 for i=(func_place + 3) to (elements_count - 1) step 3
-    nameValue  = ALL_OLE_ITEM[i    ].getAttribute("value")
-    LocalValue = ALL_OLE_ITEM[i + 1].getAttribute("value")
-    ImageValue = ALL_OLE_ITEM[i + 2].getAttribute("value")
-    if nameValue = "数学関数" then
-        break
-    endif
-    print nameValue + " : " + LocalValue + " : " + ImageValue
+	nameValue  = ALL_OLE_ITEM[i    ].getAttribute("value")
+	LocalValue = ALL_OLE_ITEM[i + 1].getAttribute("value")
+	ImageValue = ALL_OLE_ITEM[i + 2].getAttribute("value")
+	if nameValue = "数学関数" then
+		break
+	endif
+	
+	if ImageValue = "5" then
+		// 1階層キー 1F01, 1F02, .. (2F00)
+		f1Index = f1Index + 1
+		f2Index = 0
+		shortcutStr = getShortcutStr(f1Index)
+	else
+		// 2階層キー 2F01, 2F02, ..
+		f2Index = f2Index + 1
+		shortcutStr = getShortcutStr(f2Index)
+	endif
+	
+	//キー(hashKey)：順番制御用の文字列
+	hashKey = getKey(f1Index, f2Index)
+	
+	//値(hashValue)：メニューに表示する文字列
+	hashValue = shortcutStr + nameValue
+	
+	//サブメニュー開始チェック
+	//2階層最初
+	if f2Index = 1 then
+		hashValue = "{" + hashValue
+	endif
+	
+	//サブメニュー終了チェック
+	//次の要素が数学関数か1階層
+	nextImageValue = ALL_OLE_ITEM[i + 2 + 3].getAttribute("value")
+	nextnameValue  = ALL_OLE_ITEM[i     + 3].getAttribute("value")
+	if (nextnameValue = "数学関数") or (nextImageValue = "5") then
+		hashValue = hashValue + "}"
+	endif
+	
+	menuTbl[hashKey] = hashValue
 next
+
+//for i=0 to length(menuTbl)-1
+//	print menuTbl[i, HASH_KEY] + " " +menuTbl[i, HASH_VAL]
+//next
+popupmenu(menuTbl)
+
+function getKey(f1Index, f2Index)
+	f1IndexStr = format(f1Index, 2)
+	f1IndexStr = "1F" + replace(f1IndexStr, " ", "0") //1F000
+	
+	f2IndexStr = format(f2Index, 2)
+	f2IndexStr = "2F" + replace(f2IndexStr, " ", "0") //2F000
+	
+	result = f1IndexStr + "," + f2IndexStr
+fend
+function getShortcutStr(value)
+	//1→「A. 」, 2→「B. 」, ...
+	code = asc("A")
+	shortcutStr = chr(code+value -1) + ". "
+	result = shortcutStr
+fend
