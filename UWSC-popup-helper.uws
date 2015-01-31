@@ -1,0 +1,51 @@
+setup.start()
+
+
+class setup
+	dim fso
+	
+	procedure setup()
+		fso = CREATEOLEOBJ("Scripting.FileSystemObject")
+	fend
+	
+	procedure start()
+		helpTimeStamp = getLeastHelpFileStamp()
+		
+		//デコンパイル済ならhelpDecompile2015_01_18_6_30_38
+		//フォルダが存在する
+		helpDecompiledFolderPath = "helpDecompile" + helpTimeStamp
+		if fso.FolderExists(helpDecompiledFolderPath) = false then
+			helpDecompile(helpDecompiledFolderPath)
+		endif
+	fend
+	
+	function getLeastHelpFileStamp()
+		helpFilePath = GET_UWSC_DIR + "/uwsc.chm"
+		helpFile = fso.GetFile(helpFilePath)
+		dlm = helpFile.DateLastModified
+		
+		//扱いやすいようにフォーマット整形
+		//2015/01/18 6:30:38 → 2015_01_18_6_30_38
+		dlm = replace(dlm, "/", "_")
+		dlm = replace(dlm, " ", "_")
+		dlm = replace(dlm, ":", "_")
+		result = dlm
+	fend
+	
+	procedure helpDecompile(folderPath)
+		//過去に作成したフォルダがあるなら削除
+		fso.DeleteFolder("helpDecompile*", true)
+		
+		//カレントフォルダにヘルプをコピーしてデコンパイル、ヘルプ削除
+		textblock dosCopyCmd
+		copy "GET_UWSC_DIR\uwsc.chm" "GET_CUR_DIR"
+		hh.exe -decompile DECOMPILE_FOLDER uwsc.chm
+		del uwsc.chm
+		endtextblock
+		decompileCmd = replace(dosCopyCmd, "GET_UWSC_DIR", GET_UWSC_DIR)
+		decompileCmd = replace(decompileCmd, "GET_CUR_DIR", GET_CUR_DIR)
+		decompileCmd = replace(decompileCmd, "DECOMPILE_FOLDER", folderPath)
+		doscmd(decompileCmd)
+	fend
+	
+endclass

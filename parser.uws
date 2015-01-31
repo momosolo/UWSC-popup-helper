@@ -49,19 +49,21 @@ for i=(func_place + 3) to (elements_count - 1) step 3
 	//値(hashValue)：メニューに表示する文字列
 	hashValue = shortcutStr + nameValue
 	
-	//サブメニュー開始チェック
-	//2階層最初
-	if f2Index = 1 then
-		hashValue = "{" + hashValue
-	endif
-	
-	//サブメニュー終了チェック
-	//次の要素が数学関数か1階層
-	nextImageValue = ALL_OLE_ITEM[i + 2 + 3].getAttribute("value")
-	nextnameValue  = ALL_OLE_ITEM[i     + 3].getAttribute("value")
-	if (nextnameValue = "数学関数") or (nextImageValue = "5") then
-		hashValue = hashValue + "}"
-	endif
+// {}は最後につけるため、一旦削除
+
+//	//サブメニュー開始チェック
+//	//2階層最初
+//	if f2Index = 1 then
+//		hashValue = "{" + hashValue
+//	endif
+//	
+//	//サブメニュー終了チェック
+//	//次の要素が数学関数か1階層
+//	nextImageValue = ALL_OLE_ITEM[i + 2 + 3].getAttribute("value")
+//	nextnameValue  = ALL_OLE_ITEM[i     + 3].getAttribute("value")
+//	if (nextnameValue = "数学関数") or (nextImageValue = "5") then
+//		hashValue = hashValue + "}"
+//	endif
 	
 	menuTbl[hashKey] = hashValue
 next
