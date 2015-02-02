@@ -1,0 +1,70 @@
+///////////////////////////////////////////////////////////////////////////////
+// makePopupMenu.uws
+///////////////////////////////////////////////////////////////////////////////
+Popup.makePopupData("menuText.tsv")
+
+repeat
+	selectStr = Popup.start()
+until selectStr = empty
+
+class Popup
+	hashtbl hashMenuStr = HASH_SORT
+	function start()
+		ret = popupmenu(hashMenuStr)
+		
+		if ret >= 0 then
+			msgbox(hashMenuStr[ret, hash_key] + " " + hashMenuStr[ret, hash_val])
+			result = hashMenuStr[ret, hash_val]
+		else
+			result = empty
+		endif
+	fend
+	
+	procedure Popup()
+		makePopupData("menuText.tsv")
+	fend
+	
+	procedure makePopupData(fileName)
+		hashMenuStr = HASH_REMOVEALL
+		
+		fid = fopen(fileName, F_READ or F_TAB)
+		for i=1 to fget(fid, F_LINECOUNT)
+			getKey = fget(fid, i, 1)
+			getVal = fget(fid, i, 2)
+			hashMenuStr[getKey] = getVal
+		next
+		fclose(fid)
+		
+		//サブメニュ用の{}を追加する
+		level = 1
+		for i = 0 to length(hashMenuStr)-1
+			key = hashMenuStr[i, hash_key]
+			
+			//カンマで分割し、配列の長さを見れば現在のレベルが分かる
+			nowLevel = length(split(key, ","))
+			
+			//ひとつ前のレベルと異なる場合
+			if level < nowLevel then
+				//レベルが1つ下がった（サブメニュに入った）
+				hashMenuStr[key] = "{" + hashMenuStr[key]
+				level = nowLevel
+				
+			elseif level > nowLevel then
+				//レベルが上がった
+				beforeKey = hashMenuStr[i-1, hash_key]
+				for j=1 to (level - nowLevel)
+					//上がった分だけ1つ前の項目を書き換える
+					hashMenuStr[beforeKey] = hashMenuStr[beforeKey] + "}"
+				next
+				level = nowLevel
+			endif
+			
+			if i = length(hashMenuStr)-1 then
+				//最後に閉じていないメニュはすべて閉じる
+				for j=1 to level-1
+					hashMenuStr[key] = hashMenuStr[key] + "}"
+				next
+			endif
+		next
+	fend
+endclass
