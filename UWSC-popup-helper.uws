@@ -101,15 +101,22 @@ class setup
 		functionHTML.open(folderPath + "/_RESOURCE/function.htm")
 		
 		level1Key = ""
+		level1ShortcutNum = 1
+		level2ShortcutNum = 1
 		for i=0 to length(nameValue)-1
 			if imageValue[i] = "5" then
 				//レベル1メニューに追加
 				level1Key = menuInfo.getNewIndex()
-				hashMenuStr[level1Key] = nameValue[i]
+				shortcut = menuInfo.getShortcutStr(level1ShortcutNum)
+				level1ShortcutNum = level1ShortcutNum + 1
+				level2ShortcutNum = 1
+				hashMenuStr[level1Key] = shortcut + nameValue[i]
 			else
 				//レベル2メニューに追加
 				level2Key = level1Key+","+menuInfo.getNewIndex()
-				hashMenuStr[level2Key] = nameValue[i]
+				shortcut = menuInfo.getShortcutStr(level2ShortcutNum)
+				level2ShortcutNum = level2ShortcutNum + 1
+				hashMenuStr[level2Key] = shortcut + nameValue[i]
 				
 				//レベル3メニューに追加
 				anchorName = betweenstr(localValue[i], "#")
@@ -161,6 +168,13 @@ class menuInfo
 	function getIndex(num)
 		//Mxxxx
 		result = "M" + replace(format(num, 4), " ", "0")
+	fend
+	
+	function getShortcutStr(value)
+		//1→「A. 」, 2→「B. 」, ...
+		code = asc("A")
+		shortcutStr = chr(code+value -1) + ". "
+		result = shortcutStr
 	fend
 endclass
 
